@@ -6,6 +6,7 @@ REVISION	:= $(shell git rev-parse --short HEAD)
 USERNAME	:= naokitakahashi12
 
 TRUSTY := trusty
+XENIAL := xenial
 
 define dockerbuild
 	@docker build \
@@ -17,11 +18,13 @@ define dockerbuild
 endef
 
 .PHONY: build
-build: $(TRUSTY)
+build: $(TRUSTY) $(XENIAL)
 
 $(TRUSTY): $(DOCKERFILE).$(TRUSTY)
-	@echo $@
-	@echo $<
+	$(eval DOCKERIMAGE := "$(USERNAME)/$(PROJECT):$@")
+	$(call dockerbuild, $<, $(DOCKERIMAGE))
+
+$(XENIAL): $(DOCKERFILE).$(XENIAL)
 	$(eval DOCKERIMAGE := "$(USERNAME)/$(PROJECT):$@")
 	$(call dockerbuild, $<, $(DOCKERIMAGE))
 
