@@ -7,6 +7,7 @@ USERNAME	:= naokitakahashi12
 
 TRUSTY := trusty
 XENIAL := xenial
+BIONIC := bionic
 
 define dockerbuild
 	@docker build \
@@ -18,13 +19,17 @@ define dockerbuild
 endef
 
 .PHONY: build
-build: $(TRUSTY) $(XENIAL)
+build: $(TRUSTY) $(XENIAL) $(BIONIC)
 
 $(TRUSTY): $(DOCKERFILE).$(TRUSTY)
 	$(eval DOCKERIMAGE := "$(USERNAME)/$(PROJECT):$@")
 	$(call dockerbuild, $<, $(DOCKERIMAGE))
 
 $(XENIAL): $(DOCKERFILE).$(XENIAL)
+	$(eval DOCKERIMAGE := "$(USERNAME)/$(PROJECT):$@")
+	$(call dockerbuild, $<, $(DOCKERIMAGE))
+
+$(BIONIC): $(DOCKERFILE).$(BIONIC)
 	$(eval DOCKERIMAGE := "$(USERNAME)/$(PROJECT):$@")
 	$(call dockerbuild, $<, $(DOCKERIMAGE))
 
