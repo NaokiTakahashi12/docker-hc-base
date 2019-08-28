@@ -1,0 +1,123 @@
+FROM ubuntu:14.04
+
+RUN apt-get update && \
+	apt-get install -y software-properties-common && \
+	add-apt-repository ppa:ubuntu-toolchain-r/test && \
+	apt-get update && \
+	apt-get upgrade -y && \
+	apt-get install -y \
+		gcc-9 \
+		g++-9 \
+	&& \
+	apt-get remove -y \
+		software-properties-common \
+	&& \
+	apt-get autoremove -y && \
+	apt-get clean && \
+	rm -rf /var/lib/apt/lists/*
+
+ENV CC=gcc-9
+ENV CXX=g++-9
+
+RUN mkdir -p /setup/cmake && \
+	cd /setup/cmake && \
+	apt-get update && \
+	apt-get upgrade -y && \
+	apt-get install -y \
+		wget \
+		bsdtar \
+		make \
+	&& \
+	CMAKE_SOURCE_DIR=cmake-3.15.2 && \
+	CMAKE_SOURCE_TAR_FILE=cmake-3.15.2.tar.gz && \
+	wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2.tar.gz -O $CMAKE_SOURCE_TAR_FILE && \
+	mkdir $CMAKE_SOURCE_DIR && \
+	bsdtar -xf $CMAKE_SOURCE_TAR_FILE  --strip-components 1 -C $CMAKE_SOURCE_DIR && \
+	cd $CMAKE_SOURCE_DIR/ && \
+	./bootstrap && \
+	make install -j8 && \
+	apt-get remove -y \
+		wget \
+		bsdtar \
+	&& \
+	apt-get autoremove -y && \
+	apt-get clean -y && \
+	cd / && \
+	rm -rf /setup && \
+	rm -rf /var/lib/apt/lists/*
+
+ENV CMAKE_ROOT='/usr/local/share/cmake-3.15'
+
+RUN mkdir -p /setup/eigen3 && \
+	cd /setup/eigen3 && \
+	apt-get update && \
+	apt-get upgrade -y && \
+	apt-get install -y \
+		wget \
+		bsdtar \
+	&& \
+	EIGEN3_SOURCE_DIR=eigen3.3.7 && \
+	EIGEN3_SOURCE_TAR_FILE=eigen3.3.7.tar.bz2 && \
+	wget http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2 -O $EIGEN3_SOURCE_TAR_FILE && \
+	mkdir $EIGEN3_SOURCE_DIR && \
+	bsdtar -xf $EIGEN3_SOURCE_TAR_FILE --strip-components 1 -C $EIGEN3_SOURCE_DIR && \
+	mkdir $EIGEN3_SOURCE_DIR/build && \
+	cd $EIGEN3_SOURCE_DIR/build && \
+	cmake .. && \
+	make install && \
+	apt-get remove -y \
+		wget \
+		bsdtar \
+	&& \
+	apt-get autoremove -y && \
+	apt-get clean -y && \
+	cd / && \
+	rm -rf /setup && \
+	rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /setup/rbdl && \
+	cd /setup/rbdl && \
+	apt-get update && \
+	apt-get upgrade -y && \
+	apt-get install -y \
+		wget \
+		bsdtar \
+	&& \
+	RBDL_SOURCE_DIR=rbdl && \
+	RBDL_SOURCE_ZIP_FILE=rbdl.zip && \
+	wget https://bitbucket.org/rbdl/rbdl/get/default.zip -O $RBDL_SOURCE_ZIP_FILE && \
+	mkdir $RBDL_SOURCE_DIR && \
+	bsdtar -xf $RBDL_SOURCE_ZIP_FILE --strip-components 1 -C $RBDL_SOURCE_DIR && \
+	mkdir $RBDL_SOURCE_DIR/build && \
+	cd $RBDL_SOURCE_DIR/build && \
+	cmake \
+		-D RBDL_BUILD_ADDON_BENCHMARK=ON \
+		-D RBDL_BUILD_ADDON_GEOMETRY=ON \
+		-D RBDL_BUILD_ADDON_URDFREADER=ON \
+		.. \
+	&& \
+	make install -j8 && \
+	apt-get remove -y \
+		wget \
+		bsdtar \
+	&& \
+	apt-get autoremove -y && \
+	apt-get clean -y && \
+	cd / && \
+	rm -rf /setup && \
+	rm -rf /var/lib/apt/lists/*
+
+ENV RBDL_PATH='/usr/local/include'
+ENV RBDL_LIBRARY_PATH='/usr/local/lib'
+
+RUN apt-get update && \
+	apt-get upgrade -y && \
+	apt-get install -y \
+		libboost-all-dev \
+		git \
+		vim \
+	&& \
+	apt-get autoremove -y && \
+	apt-get clean && \
+	rm -rf /var/lib/apt/lists/*
+
